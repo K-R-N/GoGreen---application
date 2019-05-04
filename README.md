@@ -1,5 +1,5 @@
-[![coverage report](https://gitlab.ewi.tudelft.nl/cse1105/2018-2019/oopp-group-90/template/badges/master/coverage.svg?job=coverage&style=flat)](https://gitlab.ewi.tudelft.nl/cse1105/2018-2019/oopp-group-90/template/commits/master)
-[![pipeline status](https://gitlab.ewi.tudelft.nl/cse1105/2018-2019/oopp-group-90/template/badges/master/pipeline.svg?style=flat)](https://gitlab.ewi.tudelft.nl/cse1105/2018-2019/oopp-group-90/template/commits/master)
+For the Assignment, read the pdf of the rubric.
+
 # GoGreen  
 
 ## Introduction
