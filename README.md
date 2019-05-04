@@ -40,15 +40,15 @@ Run the tests yourself using
 
 ## Credits
 ### Frontend
-* **Jules van der Toorn** (julesvandertoo)  
-* **Kevin Nanhekhan** (knanhekhan)  
-* **Dimitar Petrov** (dpetrov)
+* **Jules van der Toorn**   
+* **Kevin Nanhekhan** 
+* **Dimitar Petrov** 
 
 ### Backend
-* **Rami Al-Obaidi** (ralobaidi)  
-* **Yuxin Jiang** (yuxinjiang)  
-* **Jonathan van Oudheusden** (jvanoudheusden)  
-* **Aleks Bako** (abako)
+* **Rami Al-Obaidi** 
+* **Yuxin Jiang**  
+* **Jonathan van Oudheusden**  
+* **Aleks Bako** 
    
 
    
