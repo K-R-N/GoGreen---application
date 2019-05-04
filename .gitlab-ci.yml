@@ -1,0 +1,69 @@
+image: maven:3-jdk-11
+
+## all stages in the pipeline
+stages:
+  - build
+  - test
+  - coverage
+  - checkstyle
+
+variables:
+  ## 'clean' is necessary for JaCoCo aggregate report
+  ## --batch-mode will avoid asking input in the terminal
+  MAVEN_CFG: "clean --batch-mode"
+
+## this stage will compile the source code in the project
+## stage fails when the project failed to compile
+build:
+  stage: build
+  script:
+    - mvn $MAVEN_CFG compile
+
+## this stage will run all tests in the project
+## stage fails when one or more tests are failing
+test:
+  stage: test
+  ## make the code coverage reports created in this stage available to further stages
+  artifacts:
+    untracked: true
+  script:
+    - mvn $MAVEN_CFG test jacoco:report jacoco:report-aggregate
+
+## this stage will output the code coverage in the terminal
+## it does so by reading in 'jacoco.csv' and pretty printing it
+## stage always succeeds
+coverage:
+  stage: coverage
+  ## get the code coverage reports generated in the previous stage
+  dependencies:
+    - test
+  script:
+    - cd tests/target/site
+    - tar -czf coverage.tar.gz jacoco-aggregate
+    - cd -
+    - "path=$(curl --request POST --header \"PRIVATE-TOKEN: SVkBTV6mz6q9RbTkvXxM\" --form \"file=@tests/target/site/coverage.tar.gz\" https://gitlab.ewi.tudelft.nl/api/v4/projects/1098/uploads | sed 's/.*\"url\":\"\\(.*\\)\",\".*/\\1/')"
+    - client=$(awk -F"," '{ branches += $6 + $7; covered += $7 } END { print "\n-- CLIENT COVERAGE REPORT --"; print covered, "/", branches, "branches covered"; print int(100*covered/branches) "%% covered\n----------------------------\n" }' client/target/site/jacoco/jacoco.csv)
+    - server=$(awk -F"," '{ branches += $6 + $7; covered += $7 } END { print "\n-- SERVER COVERAGE REPORT --"; print covered, "/", branches, "branches covered"; print int(100*covered/branches) "%% covered\n----------------------------\n" }' server/target/site/jacoco/jacoco.csv)
+    - total=$(awk -F"," '{ branches += $6 + $7; covered += $7 } END { print "\n-- TOTAL COVERAGE REPORT --"; print covered, "/", branches, "branches covered"; print int(100*covered/branches) "%% covered\n---------------------------\n" }' tests/target/site/jacoco-aggregate/jacoco.csv)
+    - totalRegex=$(awk -F"," '{ branches += $6 + $7; covered += $7 } END { printf "<coverage>%.2f\%%%%</coverage>\\n", (100*covered/branches) }' tests/target/site/jacoco-aggregate/jacoco.csv)
+    - printf "$totalRegex"
+    - printf "\n-- REPORT --\nhttps://gitlab.ewi.tudelft.nl/cse1105/2018-2019/oopp-group-90/template$path\n------------\n\n"
+    - printf "$client\n$server\n$total\n\n"
+  coverage: '/<coverage>(.*)<\/coverage>/'
+
+## this stage will output any CheckStyle warnings in the terminal
+## it does so by reading in 'checkstyle-aggregate.html' and pretty printing it
+## stage always succeeds
+checkstyle:
+  stage: checkstyle
+  script:
+    - mvn $MAVEN_CFG site
+    - cd target
+    - tar -czf checkstyle.tar.gz site
+    - cd -
+    - "path=$(curl --request POST --header \"PRIVATE-TOKEN: SVkBTV6mz6q9RbTkvXxM\" --form \"file=@target/checkstyle.tar.gz\" https://gitlab.ewi.tudelft.nl/api/v4/projects/1098/uploads | sed 's/.*\"url\":\"\\(.*\\)\",\".*/\\1/')"
+    - files=$(cat target/site/checkstyle-aggregate.html | grep -A4 "<tr class=\"b\">" | head -n 2 | tail -n 1 | grep -o '<td>.*</td>' | sed -e 's/<td>\(.*\)<\/td>/\1/')
+    - warnings=$(cat target/site/checkstyle-aggregate.html | grep -A4 "<tr class=\"b\">" | head -n 4 | tail -n 1 | grep -o '<td>.*</td>' | sed -e 's/<td>\(.*\)<\/td>/\1/')
+    - errors=$(cat target/site/checkstyle-aggregate.html | grep -A4 "<tr class=\"b\">" | head -n 5 | tail -n 1 | grep -o '<td>.*</td>' | sed -e 's/<td>\(.*\)<\/td>/\1/')
+    - printf "\n-- REPORT --\nhttps://gitlab.ewi.tudelft.nl/cse1105/2018-2019/oopp-group-90/template$path\n------------\n\n"
+    - printf "\n-- CHECKSTYLE REPORT --\n$files files\n$errors errors\n$warnings warnings\n-----------------------\n\n"

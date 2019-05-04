@@ -1,0 +1,75 @@
+# Ignore local session id store file
+client/src/main/java/gui/session/store.xml
+
+# Ignore local temp file for the final report
+doc/reports/final-report/~$nal\ report.odt
+doc/reports/final-report/.~lock.Final\ report.odt#
+
+# Ignore Eclipse configuration folder and files
+*.project
+.settings/
+*.classpath
+
+# Ignore IntelliJ configuration folder and files
+.idea/
+*.iml
+
+# Ignore SQLite log file
+*.db-journal
+
+# Ignore OS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdiskehthumbs.db
+Thumbs.db
+
+# Ignore compiled source files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Ignore compressed files
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Maven ignores
+target/
+client/target/
+server/target/
+tests/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Exclude maven wrapper
+!/.mvn/wrapper/maven-wrapper.jar
+doc/reports/final-report/~WRL0003.tmp

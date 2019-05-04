@@ -1,0 +1,45 @@
+.root, .VBox, .HBox{
+    -fx-background-color: #00cf9b;
+    -fx-border-color: none;
+    -fx-alignment: center;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+.button{
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.label, #Warning{
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-family: "Helvetica";
+    -fx-font-size: 20;
+}
+
+#Warning{
+    -fx-font-size: 15;
+}
+
+#yes-button, #Accept{
+    -fx-background-color: #00c30d;
+    -fx-font-size: 15;
+    -fx-font-family: "Helvetica";
+    -fx-text-fill: white;
+}
+
+#yes-button:hover, #Accept:hover{
+    -fx-background-color: #00af0b;
+}
+
+#no-button{
+    -fx-background-color: #ff7b79;
+    -fx-font-family: "Helvetica";
+    -fx-text-fill: white;
+    -fx-font-size: 15;
+}
+
+#no-button:hover{
+    -fx-background-color: #ae5757;
+}

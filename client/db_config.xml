@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <DataSource id="main">
+        <url>localhost</url>
+        <port_number>5432</port_number>
+        <db_name>go_green_db</db_name>
+        <username>postgres</username>
+        <password>oopp90!</password>
+        <timeout>60</timeout>
+    </DataSource>
+
+    <DataSource id="test">
+        <url>jdbc:sqlite:../database/test.db</url>
+    </DataSource>
+</config>

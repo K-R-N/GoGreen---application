@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SQLqueries>
+<get_user>Select user_details.username, user_details.profile_picture, user_details.first_name, COALESCE(Sum(activity.green_points), 0),
+ user_details.email_address, user_details.privacy_settings From user_details Left Join activity_log On user_details.username = activity_log.username Left
+ Join activity On activity.activity_id = activity_log.activity_id Where user_details.username = ? Group by user_details.username;
+</get_user>
+
+<get_points>Select COALESCE(Sum(activity.green_points),0)
+ From user_details Join activity_log On
+ user_details.username = activity_log.username
+ Join activity On activity.activity_id = activity_log.activity_id
+ Where user_details.username = ? Group by user_details.username;
+</get_points>
+
+<get_password>SELECT password
+ FROM user_details AS ud
+ WHERE ud.username = ?;
+</get_password>
+
+<get_friends>SELECT username1 as friend_name
+ FROM friends_with AS fw1
+ WHERE fw1.username2 = ?
+ UNION
+ SELECT username2 as friend_name
+ FROM friends_with AS fw2
+ WHERE fw2.username1 = ?;
+</get_friends>
+
+<get_rl>Select f1.username1 as user,
+ COALESCE(Sum(activity.green_points), 0) as points,
+ (Select profile_picture From user_details
+ as a1 Where a1.username = f1.username1)
+ From friends_with as f1 Left Join activity_log On
+ f1.username1 = activity_log.username
+ Left Join activity On activity.activity_id = activity_log.activity_id
+ Where f1.username2 = ?
+ Group by f1.username1
+ Union
+ Select f2.username2 as user,
+ COALESCE(Sum(activity.green_points), 0) as points,
+ (Select profile_picture From user_details
+ as a2 Where a2.username = f2.username2)
+ From friends_with as f2 Left Join activity_log On
+ f2.username2 = activity_log.username
+ Left Join activity On activity.activity_id = activity_log.activity_id
+ Where f2.username1 = ?
+ Group by f2.username2
+ Union
+ Select user_details.username as user,
+ COALESCE(Sum(activity.green_points), 0)
+ as points, user_details.profile_picture
+ From user_details Left Join activity_log On
+ user_details.username = activity_log.username
+ Left Join activity On activity_log.activity_id = activity.activity_id
+ Where user_details.username = ?
+ Group by user_details.username
+ Order by points DESC;
+</get_rl>
+
+<get_user_contributions>
+ SELECT * FROM
+ (SELECT * FROM
+ (SELECT al.log_id AS act_log_id,
+ null AS ach_log_id,
+ ud.username,
+ al.date,
+ al.time,
+ al.activity_id,
+ null AS achievement_id,
+ act.activity_name AS cont_name,
+ act.description AS cont_desc,
+ act.green_points
+ FROM user_details AS ud
+ JOIN activity_log AS al
+ ON ud.username = al.username
+ JOIN activity AS act
+ ON al.activity_id = act.activity_id
+ UNION
+ SELECT null AS act_log_id,
+ al.log_id AS ach_log_id,
+ ud.username,
+ al.date,
+ al.time,
+ null AS activity_id,
+ al.achievement_id,
+ act.achievement_name AS cont_name,
+ act.description AS cont_desc,
+ null as green_points
+ FROM user_details AS ud
+ JOIN achievement_log AS al
+ ON ud.username = al.username
+ JOIN achievement AS act
+ ON al.achievement_id = act.achievement_id
+ ORDER BY date DESC, time DESC
+ ) AS contribution_list
+ WHERE date &lt;= ? AND date &gt;= ?) AS range_contribution_list
+ WHERE username = ?;
+</get_user_contributions>
+
+<get_all_contributions>
+ SELECT * FROM
+ (SELECT * FROM
+ (SELECT al.log_id AS act_log_id,
+ null AS ach_log_id,
+ ud.username,
+ al.date,
+ al.time,
+ al.activity_id,
+ null AS achievement_id,
+ act.activity_name AS cont_name,
+ act.description AS cont_desc,
+ act.green_points
+ FROM user_details AS ud
+ JOIN activity_log AS al
+ ON ud.username = al.username
+ JOIN activity AS act
+ ON al.activity_id = act.activity_id
+ UNION
+ SELECT null AS act_log_id,
+ al.log_id AS ach_log_id,
+ ud.username,
+ al.date,
+ al.time,
+ null AS activity_id,
+ al.achievement_id,
+ act.achievement_name AS cont_name,
+ act.description AS cont_desc,
+ null as green_points
+ FROM user_details AS ud
+ JOIN achievement_log AS al
+ ON ud.username = al.username
+ JOIN achievement AS act
+ ON al.achievement_id = act.achievement_id
+ ORDER BY date DESC, time DESC) AS contribution_list
+ WHERE date &lt;= ? AND date &gt;= ?) AS range_contribution_list
+ WHERE username IN (
+ SELECT username1 as friend_name
+ FROM friends_with AS fw1
+ WHERE fw1.username2 = ?
+ UNION
+ SELECT username2 as friend_name
+ FROM friends_with AS fw2
+ WHERE fw2.username1 = ?
+ UNION
+ SELECT ? as friend_name
+ );
+</get_all_contributions>
+
+<test_retrieve>werkt dit?</test_retrieve>
+
+<get_timeline_fr>Select * From
+ (Select activity_log.log_id as log_id, activity_log.activity_id as contribution_id,
+ activity.activity_name as contribution_name, activity.description as contribution_description, activity.subcategory as subcategory,
+ category.category_id as activity_category_id, category.category_name as activity_category_name,
+ category.description as activity_category_description, activity.green_points as activity_points,
+ activity_log.username as user, activity_log.date as date, activity_log.time as time
+ From activity_log Left Join activity On activity_log.activity_id = activity.activity_id
+ Left Join category On activity.category_id = category.category_id
+ Left Join friends_with On friends_with.username1 = activity_log.username
+ Left Join user_details On activity_log.username = user_details.username
+ Where friends_with.username2 = ? And user_details.privacy_settings = 'public'
+ Union
+ Select activity_log.log_id as log_id, activity_log.activity_id as contribution_id,
+ activity.activity_name as contribution_name, activity.description as contribution_description, activity.subcategory as subcategory,
+ category.category_id as activity_category_id, category.category_name as activity_category_name,
+ category.description as activity_category_description, activity.green_points as activity_points,
+ activity_log.username as user, activity_log.date as date, activity_log.time as time
+ From activity_log Left Join activity On activity_log.activity_id = activity.activity_id
+ Left Join category On activity.category_id = category.category_id
+ Left Join friends_with On friends_with.username2 = activity_log.username
+ Left Join user_details On activity_log.username = user_details.username
+ Where friends_with.username1 = ? And user_details.privacy_settings = 'public'
+ Union
+ Select activity_log.log_id as log_id, activity_log.activity_id as contribution_id,
+ activity.activity_name as contribution_name, activity.description as contribution_description, activity.subcategory as subcategory,
+ category.category_id as activity_category_id, category.category_name as activity_category_name,
+ category.description as activity_category_description, activity.green_points as activity_points,
+ activity_log.username as user, activity_log.date as date, activity_log.time as time
+ From activity_log Left Join activity On activity_log.activity_id = activity.activity_id
+ Left Join category On activity.category_id = category.category_id
+ Left Join user_details On activity_log.username = user_details.username
+ Where activity_log.username = ?
+ Union
+ Select achievement_log.log_id as log_id, achievement_log.achievement_id as contribution_id,
+ achievement.achievement_name as contribution_name, achievement.description as contribution_description, Null,
+ Null, Null, Null, Null, achievement_log.username as user, achievement_log.date as date, achievement_log.time as time
+ From achievement_log Left Join achievement On achievement_log.achievement_id = achievement.achievement_id
+ Left Join user_details On achievement_log.username = user_details.username
+ Where achievement_log.username = ?
+ Union
+ Select achievement_log.log_id as log_id, achievement_log.achievement_id as contribution_id,
+ achievement.achievement_name as contribution_name, achievement.description as contribution_description, Null,
+ Null, Null, Null, Null, achievement_log.username as user, achievement_log.date as date, achievement_log.time as time
+ From achievement_log Left Join achievement On achievement_log.achievement_id = achievement.achievement_id
+ Left Join friends_with On friends_with.username1 = achievement_log.username
+ Left Join user_details On achievement_log.username = user_details.username
+ Where friends_with.username2 = ? And user_details.privacy_settings = 'public'
+ Union
+ Select achievement_log.log_id as log_id, achievement_log.achievement_id as contribution_id,
+ achievement.achievement_name as contribution_name, achievement.description as contribution_description, Null,
+ Null, Null, Null, Null, achievement_log.username as user, achievement_log.date as date, achievement_log.time as time
+ From achievement_log Left Join achievement On achievement_log.achievement_id = achievement.achievement_id
+ Left Join friends_with On friends_with.username2 = achievement_log.username
+ Left Join user_details On achievement_log.username = user_details.username
+ Where friends_with.username1 = ? And user_details.privacy_settings = 'public') as timeline
+ Where date &gt;= ? And date &lt;=?
+ Order by date Desc, time Desc;
+</get_timeline_fr>
+
+<get_timeline_main>Select * From (Select activity_log.log_id as log_id, activity_log.activity_id as contribution_id,
+ activity.activity_name as contribution_name, activity.description as contribution_description, activity.subcategory as subcategory,
+ category.category_id as activity_category_id, category.category_name as activity_category_name,
+ category.description as activity_category_description, activity.green_points as activity_points,
+ activity_log.username as user, activity_log.date as date, activity_log.time as time
+ From activity_log Left Join activity On activity_log.activity_id = activity.activity_id
+ Left Join category On activity.category_id = category.category_id
+ Left Join user_details On activity_log.username = user_details.username
+ Where activity_log.username = ?
+ Union
+ Select achievement_log.log_id as log_id, achievement_log.achievement_id as contribution_id,
+ achievement.achievement_name as contribution_name, achievement.description as contribution_description, Null,
+ Null, Null, Null, Null, achievement_log.username as user, achievement_log.date as date, achievement_log.time as time
+ From achievement_log Left Join achievement On achievement_log.achievement_id = achievement.achievement_id
+ Left Join user_details On achievement_log.username = user_details.username
+ Where achievement_log.username = ?) as timeline
+ Where date &gt;= ? And date &lt;=?
+ Order by date Desc, time Desc;
+</get_timeline_main>
+
+<get_timeline_single>Select * From (Select activity_log.log_id as log_id, activity_log.activity_id as contribution_id,
+ activity.activity_name as contribution_name, activity.description as contribution_description, activity.subcategory as subcategory,
+ category.category_id as activity_category_id, category.category_name as activity_category_name,
+ category.description as activity_category_description, activity.green_points as activity_points,
+ activity_log.username as user, activity_log.date as date, activity_log.time as time
+ From activity_log Left Join activity On activity_log.activity_id = activity.activity_id
+ Left Join category On activity.category_id = category.category_id
+ Left Join user_details On activity_log.username = user_details.username
+ Where activity_log.username = ? And user_details.privacy_settings = 'public'
+ Union
+ Select achievement_log.log_id as log_id, achievement_log.achievement_id as contribution_id,
+ achievement.achievement_name as contribution_name, achievement.description as contribution_description, Null,
+ Null, Null, Null, Null, achievement_log.username as user, achievement_log.date as date, achievement_log.time as time
+ From achievement_log Left Join achievement On achievement_log.achievement_id = achievement.achievement_id
+ Left Join user_details On achievement_log.username = user_details.username
+ Where achievement_log.username = ? And user_details.privacy_settings = 'public') as timeline
+ Where date &gt;= ? And date &lt;=?
+ Order by date Desc, time Desc;
+</get_timeline_single>
+
+<get_achievements>Select ach.achievement_id, ach.achievement_name, ach.description,
+ Exists(Select * From achievement_log Where username = ? And achievement_log.achievement_id
+ = ach.achievement_id) as acquired From achievement as ach Order by acquired Desc;
+</get_achievements>
+
+<get_activities>Select activity.activity_id, activity.activity_name, activity.green_points,
+ category.category_id, category.category_name, category.description, activity.subcategory, activity.description
+ From activity Join category On activity.category_id = category.category_id;
+</get_activities>
+</SQLqueries>

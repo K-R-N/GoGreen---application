@@ -1,0 +1,76 @@
+.button{
+    -fx-background-radius: 20;
+    -fx-font-family: "'Roboto Regular', sans-serif";
+    -fx-font-size: 20;
+    -fx-font-weight: bold;
+    -fx-border-color: black;
+    -fx-border-radius: 20;
+    -fx-text-fill: #FFFFFF;
+    -fx-highlight-text-fill: black;
+}
+
+.rank-label {
+    -fx-font-size: 18;
+    -fx-text-fill: #505050;
+    -fx-font-family: "'Roboto Regular', sans-serif";
+}
+
+.request-title {
+    -fx-font-size: 15;
+}
+
+.empty-request {
+    -fx-font-size: 12;
+    -fx-font-family: "'Roboto Regular', sans-serif";
+}
+
+.Add-Activity{
+    -fx-font-size: 15;
+    -fx-border-color: none;
+}
+
+.Delete-Friend{
+    -fx-border-radius: 10;
+    -fx-background-color: #ED5E68;
+    -fx-background-radius: 10;
+    -fx-border-color: none;
+}
+
+.Delete-Friend:hover{
+    -fx-background-color: #DC4E58;
+    -fx-text-fill: #F2F2F2;
+}
+
+.Add-Friend{
+    -fx-background-radius: 10;
+    -fx-border-color: none;
+    -fx-background-color: #87cc95;
+    -fx-font-size: 15;
+    -fx-font-family: "'Roboto Regular', sans-serif";
+}
+
+.Add-Friend:hover{
+    -fx-background-color: #66a072;
+}
+
+.Add-Activity:pressed {
+    -fx-background-color: #437a4e;
+}
+
+.Search {
+    -fx-font-size: 17;
+    -fx-font-family: "'Roboto Regular', sans-serif";
+}
+
+.Link {
+   -fx-text-fill:  #505050;
+    -fx-font-family: "'Roboto Regular', sans-serif";
+}
+
+.Link:hover{
+  -fx-text-fill:  #303030;
+}
+
+.Link:pressed{
+    -fx-text-fill: #101010;
+}
